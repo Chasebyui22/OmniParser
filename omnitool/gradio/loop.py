@@ -28,6 +28,7 @@ class APIProvider(StrEnum):
     BEDROCK = "bedrock"
     VERTEX = "vertex"
     OPENAI = "openai"
+    OLLAMA = "ollama"
 
 
 PROVIDER_TO_DEFAULT_MODEL_NAME: dict[APIProvider, str] = {
@@ -49,7 +50,11 @@ def sampling_loop_sync(
     only_n_most_recent_images: int | None = 2,
     max_tokens: int = 4096,
     omniparser_url: str,
-    save_folder: str = "./uploads"
+    save_folder: str = "./uploads",
+    ollama_model_name: str = "",
+    ollama_json_model_name: str = "",
+    ollama_base_url: str = "http://localhost:11434",
+    ollama_supports_vision: bool = True
 ):
     """
     Synchronous agentic sampling loop for the assistant/tool interaction of computer use.
@@ -66,7 +71,7 @@ def sampling_loop_sync(
             max_tokens=max_tokens,
             only_n_most_recent_images=only_n_most_recent_images
         )
-    elif model in set(["omniparser + gpt-4o", "omniparser + o1", "omniparser + o3-mini", "omniparser + R1", "omniparser + qwen2.5vl"]):
+    elif model in set(["omniparser + gpt-4o", "omniparser + o1", "omniparser + o3-mini", "omniparser + R1", "omniparser + qwen2.5vl", "omniparser + ollama"]):
         actor = VLMAgent(
             model=model,
             provider=provider,
@@ -74,9 +79,13 @@ def sampling_loop_sync(
             api_response_callback=api_response_callback,
             output_callback=output_callback,
             max_tokens=max_tokens,
-            only_n_most_recent_images=only_n_most_recent_images
+            only_n_most_recent_images=only_n_most_recent_images,
+            ollama_model_name=ollama_model_name,
+            ollama_json_model_name=ollama_json_model_name,
+            ollama_base_url=ollama_base_url,
+            ollama_supports_vision=ollama_supports_vision
         )
-    elif model in set(["omniparser + gpt-4o-orchestrated", "omniparser + o1-orchestrated", "omniparser + o3-mini-orchestrated", "omniparser + R1-orchestrated", "omniparser + qwen2.5vl-orchestrated"]):
+    elif model in set(["omniparser + gpt-4o-orchestrated", "omniparser + o1-orchestrated", "omniparser + o3-mini-orchestrated", "omniparser + R1-orchestrated", "omniparser + qwen2.5vl-orchestrated", "omniparser + ollama-orchestrated"]):
         actor = VLMOrchestratedAgent(
             model=model,
             provider=provider,
@@ -85,7 +94,11 @@ def sampling_loop_sync(
             output_callback=output_callback,
             max_tokens=max_tokens,
             only_n_most_recent_images=only_n_most_recent_images,
-            save_folder=save_folder
+            save_folder=save_folder,
+            ollama_model_name=ollama_model_name,
+            ollama_json_model_name=ollama_json_model_name,
+            ollama_base_url=ollama_base_url,
+            ollama_supports_vision=ollama_supports_vision
         )
     else:
         raise ValueError(f"Model {model} not supported")
@@ -115,7 +128,7 @@ def sampling_loop_sync(
 
             messages.append({"content": tool_result_content, "role": "user"})
     
-    elif model in set(["omniparser + gpt-4o", "omniparser + o1", "omniparser + o3-mini", "omniparser + R1", "omniparser + qwen2.5vl", "omniparser + gpt-4o-orchestrated", "omniparser + o1-orchestrated", "omniparser + o3-mini-orchestrated", "omniparser + R1-orchestrated", "omniparser + qwen2.5vl-orchestrated"]):
+    elif model in set(["omniparser + gpt-4o", "omniparser + o1", "omniparser + o3-mini", "omniparser + R1", "omniparser + qwen2.5vl", "omniparser + ollama", "omniparser + gpt-4o-orchestrated", "omniparser + o1-orchestrated", "omniparser + o3-mini-orchestrated", "omniparser + R1-orchestrated", "omniparser + qwen2.5vl-orchestrated", "omniparser + ollama-orchestrated"]):
         while True:
             parsed_screen = omniparser_client()
             tools_use_needed, vlm_response_json = actor(messages=messages, parsed_screen=parsed_screen)

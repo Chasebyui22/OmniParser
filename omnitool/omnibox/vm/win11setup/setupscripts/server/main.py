@@ -51,7 +51,7 @@ def execute(data):
     }), 500
 
 
-execute_impl = execute   # switch to execute_anything to allow any command. Please use with caution only for testing purposes.
+execute_impl = execute_anything   # switch to execute_anything to allow any command. Please use with caution only for testing purposes.
 
 
 parser = argparse.ArgumentParser()
@@ -95,4 +95,4 @@ def capture_screen_with_cursor():
     return send_file(img_io, mimetype='image/png')
 
 if __name__ == '__main__':
-    app.run(host="10.0.2.15", port=args.port)
+    app.run(host="0.0.0.0", port=args.port)

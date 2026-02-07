@@ -125,3 +125,12 @@ To align with the Microsoft AI principles and Responsible AI practices, we condu
 Kudos to the amazing resources that are invaluable in the development of our code: [Claude Computer Use](https://github.com/anthropics/anthropic-quickstarts/blob/main/computer-use-demo/README.md), [OS World](https://github.com/xlang-ai/OSWorld), [Windows Agent Arena](https://github.com/microsoft/WindowsAgentArena), and [computer_use_ootb](https://github.com/showlab/computer_use_ootb).
 We are grateful for helpful suggestions and feedbacks provided by Francesco Bonacci, Jianwei Yang, Dillon DuPont, Yue Wu, Anh Nguyen.
 Many thanks to @keyserjaya for screenshots on omnibox install.
+
+
+taskkill /IM ollama.exe /F
+$env:OLLAMA_HOST="0.0.0.0:11434"
+$env:OLLAMA_DEBUG="1"
+$env:CUDA_VISIBLE_DEVICES="0"
+ollama serve
+
+python app.py --windows_host_url localhost:8006 --omniparser_server_url localhost:8000

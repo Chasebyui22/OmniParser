@@ -47,8 +47,13 @@ if (-not $downloadResult) {
     Write-Host "Failed to download Python. Please try again later or install manually."
 } else {
     Write-Host "Installing Python for current user..."
-    Start-Process -FilePath $pythonInstallerFilePath -Args "/quiet InstallAllUsers=0 PrependPath=0" -NoNewWindow -Wait
+    Start-Process -FilePath $pythonInstallerFilePath -Args "/quiet InstallAllUsers=0 PrependPath=1" -NoNewWindow -Wait
     $pythonExecutablePath = "$userPythonPath\Python310\python.exe"
+    $pythonScriptsPath = "$userPythonPath\Python310\Scripts"
+    # Add Python and its Scripts directory to the system PATH so that
+    # python/pip are available in all sessions (scheduled tasks, cmd, etc.)
+    Add-ToEnvPath -NewPath (Split-Path $pythonExecutablePath)
+    Add-ToEnvPath -NewPath $pythonScriptsPath
     $setAliasExpression = "Set-Alias -Name $pythonAlias -Value `"$pythonExecutablePath`""
     Add-Content -Path $PROFILE -Value $setAliasExpression
     Invoke-Expression $setAliasExpression

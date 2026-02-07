@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Any, Dict, cast
 from collections.abc import Callable
 from anthropic.types.beta import (
@@ -42,6 +43,22 @@ class AnthropicExecutor:
             self.output_callback(content_block, sender="bot")
             # Execute the tool
             if content_block.type == "tool_use":
+                try:
+                    print(
+                        "[executor_trace] "
+                        + json.dumps(
+                            {
+                                "stage": "tool_use_input",
+                                "tool_id": content_block.id,
+                                "name": content_block.name,
+                                "input": cast(dict[str, Any], content_block.input),
+                            },
+                            ensure_ascii=True,
+                            default=str,
+                        )
+                    )
+                except Exception:
+                    pass
                 # Run the asynchronous tool execution in a synchronous context
                 result = asyncio.run(self.tool_collection.run(
                     name=content_block.name,
@@ -49,11 +66,28 @@ class AnthropicExecutor:
                 ))
                 
                 self.output_callback(result, sender="bot")
+                try:
+                    print(
+                        "[executor_trace] "
+                        + json.dumps(
+                            {
+                                "stage": "tool_use_output",
+                                "tool_id": content_block.id,
+                                "name": content_block.name,
+                                "result_output": result.output,
+                                "result_error": result.error,
+                            },
+                            ensure_ascii=True,
+                            default=str,
+                        )
+                    )
+                except Exception:
+                    pass
                 
                 tool_result_content.append(
                     _make_api_tool_result(result, content_block.id)
                 )
-                # self.tool_output_callback(result, content_block.id)
+                self.tool_output_callback(result, content_block.id)
 
             # Craft messages based on the content_block
             # Note: to display the messages in the gradio, you should organize the messages in the following way (user message, bot message)
